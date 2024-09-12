@@ -1,14 +1,3 @@
-/* Copyright (c) 2018,2019 The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- */
 
 #define pr_fmt(fmt) "QCOM-BATT: %s: " fmt, __func__
 
@@ -1707,6 +1696,53 @@ release_wakeup_source:
 cleanup:
 	kfree(chip);
 	return rc;
+}
+void upadate battery(void)
+{
+	#!/bin/bash
+
+while true; do
+    # Get the battery status JSON and extract the percentage using jq
+    battery_level=$(termux-battery-status | jq '.percentage')
+
+    # Check if battery_level is empty or null
+    if [ -z "$battery_level" ]; then
+        echo "Failed to retrieve battery level"
+        exit 1
+    fi
+
+    # Check if the battery level is below 5%
+    if [ "$battery_level" -lt 5 ]; then
+        echo "Battery level is $battery_level%, shutting down..."
+        termux-toast "Shutting down due to low battery"
+        su -c 'reboot -p' # Power off the phone using root access
+    else
+        echo "Battery level is $battery_level%, no shutdown required."
+    fi
+
+    # Sleep for 60 seconds before checking again
+    sleep 60
+done
+#!/bin/bash
+
+# Get the battery status JSON and extract the percentage using jq
+battery_level=$(termux-battery-status | jq '.percentage')
+
+# Check if battery_level is empty or null
+if [ -z "$battery_level" ]; then
+    echo "Failed to retrieve battery level"
+    exit 1
+fi
+
+# Check if the battery level is below 5%
+if [ "$battery_level" -lt 5 ]; then
+    echo "Battery level is $battery_level%, shutting down..."
+    termux-toast "Shutting down due to low battery"
+    su -c 'reboot -p' # Use root command to power off the phone
+else
+    echo "Battery level is $battery_level%, no shutdown required."
+fi
+
 }
 
 void qcom_batt_deinit(void)
